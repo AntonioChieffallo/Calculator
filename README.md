@@ -17,6 +17,15 @@ A full-stack web calculator featuring a C++ backend server and modern HTML/CSS/J
 - **Build System**: GNU Make
 - **Protocols**: HTTP/1.1, JSON REST API
 
+## 🚀 Live Demo (GitHub Codespaces)
+
+**Want to try it right now?**
+1. Click the green "Code" button above
+2. Select "Codespaces" tab → "Create codespace"  
+3. In the terminal, run: `./start.sh`
+4. Click the port forwarding notification to open the calculator
+5. Enjoy the live C++ web calculator!
+
 ## Quick Start
 
 ### Prerequisites
