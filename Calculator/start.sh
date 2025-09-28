@@ -6,11 +6,12 @@ echo "🧮 C++ Calculator Server Setup"
 echo "================================="
 
 # Check if the server binary exists
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 if [ ! -f "calculator_server" ]; then
     echo "📦 Building the calculator server..."
     make clean
     make
-    
     if [ $? -ne 0 ]; then
         echo "❌ Build failed. Please check the error messages above."
         exit 1

@@ -183,7 +183,7 @@
     <div class="calculator">
         <div class="header">
             <h1>Calculator</h1>
-            <p>Powered by C++ Backend</p>
+            <p>Modern Web Calculator</p>
         </div>
         
         <div class="display" id="display">0</div>
@@ -214,7 +214,7 @@
         </div>
 
         <div class="footer">
-            <p>Built with C++ • Designed for Resume</p>
+            <p>Built with JavaScript • Designed for Portfolio</p>
         </div>
     </div>
 
@@ -268,57 +268,49 @@
                 return null;
             }
 
-            // Convert display operators to backend operators
-            let backendOperator = operator;
-            if (operator === '×') backendOperator = '*';
-            if (operator === '−') backendOperator = '-';
+            // Convert display operators to standard operators
+            let calcOperator = operator;
+            if (operator === '×') calcOperator = '*';
+            if (operator === '−') calcOperator = '-';
 
-            return sendCalculationRequest(prev, backendOperator, current);
-        }
-
-        async function sendCalculationRequest(num1, op, num2) {
-            try {
-                const response = await fetch('http://localhost:8080/calculate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        num1: num1,
-                        operator: op,
-                        num2: num2
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    return data.result;
-                } else {
-                    showError(data.error || 'Calculation error');
-                    return null;
-                }
-            } catch (error) {
-                showError('Connection error - Make sure C++ server is running');
-                return null;
-            }
-        }
-
-        async function calculate() {
-            if (operator && firstNumber !== null && !waitingForOperand) {
-                document.querySelector('.calculator').classList.add('loading');
-                
-                try {
-                    const result = await performCalculation();
-                    if (result !== null) {
-                        currentInput = String(result);
-                        firstNumber = null;
-                        operator = null;
-                        waitingForOperand = true;
-                        updateDisplay();
+            // Perform calculation locally
+            let result;
+            switch (calcOperator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        showError('Cannot divide by zero');
+                        return null;
                     }
-                } finally {
-                    document.querySelector('.calculator').classList.remove('loading');
+                    result = prev / current;
+                    break;
+                default:
+                    showError('Invalid operator');
+                    return null;
+            }
+
+            // Round to avoid floating point precision issues
+            result = Math.round(result * 1000000000) / 1000000000;
+            return result;
+        }
+
+        function calculate() {
+            if (operator && firstNumber !== null && !waitingForOperand) {
+                const result = performCalculation();
+                if (result !== null) {
+                    currentInput = String(result);
+                    firstNumber = null;
+                    operator = null;
+                    waitingForOperand = true;
+                    updateDisplay();
                 }
             }
         }

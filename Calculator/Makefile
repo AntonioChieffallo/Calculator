@@ -3,7 +3,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2
 LIBS = -lpthread
 TARGET = calculator_server
-SOURCE = Calculator/calculator.cpp
+SOURCE = calculator.cpp
 
 # Default target
 all: $(TARGET)
