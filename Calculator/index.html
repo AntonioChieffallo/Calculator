@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: right;
+            font-size: 2em;
+            font-weight: 500;
+            color: #333;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .display.error {
+            background: #fee;
+            border-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        button {
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .number {
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+        }
+
+        .number:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .operator {
+            background: #667eea;
+            color: white;
+        }
+
+        .operator:hover {
+            background: #5a6fd8;
+        }
+
+        .equals {
+            background: #28a745;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .equals:hover {
+            background: #218838;
+        }
+
+        .clear {
+            background: #dc3545;
+            color: white;
+        }
+
+        .clear:hover {
+            background: #c82333;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+
+        .loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .loading button {
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .display {
+                font-size: 1.5em;
+                min-height: 60px;
+                padding: 15px;
+            }
+            
+            button {
+                padding: 15px;
+                font-size: 1.1em;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h1>Calculator</h1>
+            <p>Powered by C++ Backend</p>
+        </div>
+        
+        <div class="display" id="display">0</div>
+        
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button class="operator" onclick="inputOperator('/')">/</button>
+            <button class="operator" onclick="inputOperator('*')">×</button>
+            <button class="operator" onclick="deleteLast()">⌫</button>
+            
+            <button class="number" onclick="inputNumber('7')">7</button>
+            <button class="number" onclick="inputNumber('8')">8</button>
+            <button class="number" onclick="inputNumber('9')">9</button>
+            <button class="operator" onclick="inputOperator('-')">−</button>
+            
+            <button class="number" onclick="inputNumber('4')">4</button>
+            <button class="number" onclick="inputNumber('5')">5</button>
+            <button class="number" onclick="inputNumber('6')">6</button>
+            <button class="operator" onclick="inputOperator('+')">+</button>
+            
+            <button class="number" onclick="inputNumber('1')">1</button>
+            <button class="number" onclick="inputNumber('2')">2</button>
+            <button class="number" onclick="inputNumber('3')">3</button>
+            <button class="equals" onclick="calculate()" rowspan="2">=</button>
+            
+            <button class="number zero" onclick="inputNumber('0')">0</button>
+            <button class="number" onclick="inputNumber('.')">.</button>
+        </div>
+
+        <div class="footer">
+            <p>Built with C++ • Designed for Resume</p>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let currentInput = '0';
+        let operator = null;
+        let firstNumber = null;
+        let waitingForOperand = false;
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+            display.classList.remove('error');
+        }
+
+        function inputNumber(num) {
+            if (waitingForOperand) {
+                currentInput = num;
+                waitingForOperand = false;
+            } else {
+                currentInput = currentInput === '0' ? num : currentInput + num;
+            }
+            updateDisplay();
+        }
+
+        function inputOperator(nextOperator) {
+            const inputValue = parseFloat(currentInput);
+
+            if (firstNumber === null) {
+                firstNumber = inputValue;
+            } else if (operator) {
+                const result = performCalculation();
+                if (result !== null) {
+                    currentInput = String(result);
+                    firstNumber = result;
+                    updateDisplay();
+                } else {
+                    return; // Error occurred
+                }
+            }
+
+            waitingForOperand = true;
+            operator = nextOperator;
+        }
+
+        function performCalculation() {
+            const prev = firstNumber;
+            const current = parseFloat(currentInput);
+
+            if (prev === null || isNaN(current)) {
+                return null;
+            }
+
+            // Convert display operators to backend operators
+            let backendOperator = operator;
+            if (operator === '×') backendOperator = '*';
+            if (operator === '−') backendOperator = '-';
+
+            return sendCalculationRequest(prev, backendOperator, current);
+        }
+
+        async function sendCalculationRequest(num1, op, num2) {
+            try {
+                const response = await fetch('http://localhost:8080/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        num1: num1,
+                        operator: op,
+                        num2: num2
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    return data.result;
+                } else {
+                    showError(data.error || 'Calculation error');
+                    return null;
+                }
+            } catch (error) {
+                showError('Connection error - Make sure C++ server is running');
+                return null;
+            }
+        }
+
+        async function calculate() {
+            if (operator && firstNumber !== null && !waitingForOperand) {
+                document.querySelector('.calculator').classList.add('loading');
+                
+                try {
+                    const result = await performCalculation();
+                    if (result !== null) {
+                        currentInput = String(result);
+                        firstNumber = null;
+                        operator = null;
+                        waitingForOperand = true;
+                        updateDisplay();
+                    }
+                } finally {
+                    document.querySelector('.calculator').classList.remove('loading');
+                }
+            }
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            firstNumber = null;
+            operator = null;
+            waitingForOperand = false;
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            updateDisplay();
+        }
+
+        function showError(message) {
+            display.textContent = message;
+            display.classList.add('error');
+            
+            // Reset after 3 seconds
+            setTimeout(() => {
+                clearDisplay();
+            }, 3000);
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            
+            if (key >= '0' && key <= '9' || key === '.') {
+                inputNumber(key);
+            } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+                inputOperator(key);
+            } else if (key === 'Enter' || key === '=') {
+                event.preventDefault();
+                calculate();
+            } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                clearDisplay();
+            } else if (key === 'Backspace') {
+                deleteLast();
+            }
+        });
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
